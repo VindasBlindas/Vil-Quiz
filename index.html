@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Vil-Analítico — Quiz avanzado (tema oscuro, responsive)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#0f1724;
+  --accent1:#8b5cf6;
+  --accent2:#06b6d4;
+  --muted:#9aa4b2;
+  --glass: rgba(255,255,255,0.03);
+  --card: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  --success:#10b981;
+  --danger:#ef4444;
+  --shadow: 0 10px 30px rgba(2,6,23,0.6);
+  --radius:14px;
+  --glass-border: rgba(255,255,255,0.04);
+  --max-side-width:380px;
+  --gap:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+html,body{height:100%;background:
+  radial-gradient(1000px 400px at 10% 10%, rgba(139,92,246,0.07), transparent 12%),
+  radial-gradient(900px 350px at 90% 90%, rgba(6,182,212,0.04), transparent 12%),
+  var(--bg);
+  color:#e6eef8;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+
+/* container */
+.container{
+  max-width:1200px;
+  margin:28px auto;
+  padding:20px;
+  display:grid;
+  grid-template-columns: 1fr minmax(300px, var(--max-side-width));
+  gap:var(--gap);
+  align-items:start;
+}
+
+/* header */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.logo{display:flex;align-items:center;gap:10px;padding:8px 12px;background:linear-gradient(90deg,var(--panel), rgba(255,255,255,0.02));border-radius:12px;border:1px solid var(--glass-border);box-shadow:var(--shadow);}
+.logo svg{width:36px;height:36px;flex-shrink:0;}
+.title{font-weight:700;font-size:18px;line-height:1.3;}
+.subtitle{font-size:13px;color:var(--muted);line-height:1.4;margin-top:4px;}
+
+/* main card */
+.main-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--glass-border);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px;min-width:0;}
+
+/* grid of controls */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start;}
+.col-span-3{grid-column:1 / -1;}
+
+/* rows: responsive behavior - label + control side-by-side on wide, stacked on narrow */
+.row{display:flex;gap:10px;align-items:center;width:100%;flex-wrap:wrap;}
+.label{font-size:13px;color:var(--muted);flex:0 0 160px;min-width:120px;line-height:1.4;display:block;}
+.input, textarea, select{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);padding:10px 12px;border-radius:10px;color:inherit;outline:none;width:100%;font-size:14px;transition:border-color 0.2s, background 0.2s;min-width:0;}
+.input:focus, textarea:focus, select:focus{border-color:var(--accent1);background:rgba(255,255,255,0.04);}
+textarea{min-height:120px;resize:vertical;padding-top:12px;line-height:1.5;}
+
+/* range controls */
+.range-wrap{display:flex;align-items:center;gap:12px;flex:1;min-width:140px;}
+.range{-webkit-appearance:none;appearance:none;height:8px;border-radius:999px;background:linear-gradient(90deg,#1f2937,#111827);outline:none;width:100%;cursor:pointer;}
+.range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(180deg,var(--accent1),var(--accent2));border:3px solid rgba(255,255,255,0.1);box-shadow:0 6px 18px rgba(11,22,60,0.6);cursor:pointer;transition:transform 0.12s;position:relative;}
+.range::-webkit-slider-thumb:hover{transform:scale(1.08);}
+.range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(180deg,var(--accent1),var(--accent2));border:3px solid rgba(255,255,255,0.1);box-shadow:0 6px 18px rgba(11,22,60,0.6);cursor:pointer;}
+.value-bubble{min-width:42px;text-align:center;font-weight:700;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);font-size:13px;flex-shrink:0;}
+
+/* controls */
+.controls{display:flex;gap:10px;flex-wrap:wrap;}
+.btn{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#fff;box-shadow:0 8px 20px rgba(6,11,22,0.6);transition:transform 0.2s, box-shadow 0.2s;font-size:14px;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(6,11,22,0.8);}
+.btn:active{transform:translateY(0);}
+.btn.ghost{background:transparent;border:1px solid var(--glass-border);color:var(--muted);font-weight:600;box-shadow:none;}
+.btn.ghost:hover{background:rgba(255,255,255,0.04);color:#fff;border-color:rgba(255,255,255,0.15);}
+.small{font-size:13px;color:var(--muted);line-height:1.5;}
+
+/* checkboxes */
+label.checkbox{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;}
+input[type="checkbox"]{cursor:pointer;width:16px;height:16px;}
+
+/* side panel */
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:22px;align-self:flex-start;max-height:calc(100vh - 44px);overflow-y:auto;padding-bottom:6px;}
+.panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));padding:16px;border-radius:12px;border:1px solid var(--glass-border);box-shadow:var(--shadow);min-width:0;}
+.panel-title{font-weight:700;font-size:15px;margin-bottom:12px;}
+.gauge{display:flex;align-items:center;gap:12px;justify-content:space-between;}
+.gauge .circle{width:128px;height:128px;border-radius:999px;background:conic-gradient(var(--accent1) 0deg, rgba(255,255,255,0.03) 0deg);display:flex;align-items:center;justify-content:center;box-shadow: 0 8px 30px rgba(2,6,23,0.6);transition:background 0.6s ease;}
+.gauge .inner{width:104px;height:104px;border-radius:999px;background:linear-gradient(180deg,#081021,#07111b);display:flex;align-items:center;justify-content:center;flex-direction:column;border:1px solid rgba(255,255,255,0.03);}
+.gauge .num{font-weight:800;font-size:28px;}
+.grade{font-weight:700;font-size:14px;}
+.breakdown{display:grid;gap:10px;margin-top:12px;}
+.break-row{display:flex;align-items:center;gap:10px;justify-content:space-between;}
+.break-row > div:first-child{font-size:13px;min-width:90px;}
+.bar{height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;flex:1;margin:0 8px;border:1px solid rgba(255,255,255,0.02);}
+.bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:0%;transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1);}
+
+.badge{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);font-weight:700;font-size:12px;min-width:48px;text-align:center;}
+
+/* tips & plan */
+.tips-list{display:flex;flex-direction:column;gap:10px;}
+.tip{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);font-size:13px;line-height:1.5;}
+.priority{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;margin-left:8px;background:rgba(0,0,0,0.3);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;}
+.priority.urgente{background:rgba(239,68,68,0.12);color:var(--danger);}
+.priority.alta{background:rgba(251,146,60,0.12);color:#fb923c;}
+.priority.media{background:rgba(250,204,21,0.12);color:#facc15;}
+.priority.baja{background:rgba(16,185,129,0.08);color:var(--success);}
+
+/* saved list */
+.saved-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:6px;}
+.saved-list::-webkit-scrollbar{width:6px;}
+.saved-list::-webkit-scrollbar-track{background:rgba(255,255,255,0.02);border-radius:999px;}
+.saved-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:999px;}
+.saved-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);}
+.saved-item .meta{display:flex;flex-direction:column;font-size:13px;color:var(--muted);flex:1;min-width:0;}
+.saved-item .meta > div:first-child{font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.saved-actions{display:flex;gap:6px;flex-shrink:0;}
+
+/* footer */
+.footer{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.04);flex-wrap:wrap;}
+.top-inputs{display:flex;gap:12px;flex-wrap:wrap;}
+.top-inputs > *{flex:1;min-width:140px;}
+
+/* buttons small adjustments */
+.saved-actions .btn{padding:6px 12px;font-size:12px;}
+
+.input[type="number"]{padding:8px 10px;width:100%;}
+
+/* responsive tweaks */
+@media (max-width:980px){
+  .container{grid-template-columns:1fr;padding:16px;}
+  .side{position:relative;top:auto;max-height:none;padding-bottom:0;}
+  .grid{grid-template-columns:repeat(2,1fr);}
+  .label{flex-basis:140px;}
+  .top-inputs > *{min-width:120px;}
+}
+
+/* narrow screens */
+@media (max-width:640px){
+  .container{padding:12px;margin:12px auto;}
+  .grid{grid-template-columns:1fr;}
+  .label{flex-basis:100%;width:100%;min-width:0;}
+  .range-wrap{min-width:0;width:100%;}
+  .logo{gap:8px;padding:6px 10px;}
+  .logo svg{width:28px;height:28px;}
+  .title{font-size:16px;}
+  .subtitle{font-size:12px;}
+  .gauge .circle{width:100px;height:100px;}
+  .gauge .inner{width:82px;height:82px;}
+  .gauge .num{font-size:24px;}
+  .top-inputs{flex-direction:column;}
+  .top-inputs > *{min-width:100%;}
+  .footer{flex-direction:column;align-items:stretch;}
+  .footer > div:last-child{justify-content:center;}
+  .side{position:relative;top:auto;}
+}
+
+/* print */
+@media print{
+  body{background:#fff;color:#000;}
+  .btn{display:none;}
+  .side{position:relative;}
+}
+</style>
+</head>
+<body>
+<main class="container" id="app">
+  <section style="min-width:0;">
+    <div class="header">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vil-Analítico">
+          <rect x="0" y="0" width="48" height="48" rx="10" fill="url(#g)"/>
+          <defs>
+            <linearGradient id="g" x1="0" x2="1">
+              <stop offset="0" stop-color="#8B5CF6"/>
+              <stop offset="1" stop-color="#06B6D4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div style="min-width:0;">
+        <div class="title">Vil-Analítico — Quiz avanzado</div>
+        <div class="subtitle">Analiza profundidad, amenaza y escritura del villano. Oscuro, responsive y 100% funcional.</div>
+      </div>
+    </div>
+
+    <form id="quiz" class="main-card" onsubmit="return false" aria-labelledby="formTitle">
+      <div class="top-inputs">
+        <input id="name" class="input" placeholder="Nombre del villano (opcional)" aria-label="Nombre del villano" />
+        <select id="role" class="input" aria-label="Tipo de rol">
+          <option value="antagonista">Antagonista principal</option>
+          <option value="antiheroe">Antihéroe</option>
+          <option value="rival">Rival/Antagonista secundario</option>
+          <option value="gris">Figura moralmente gris</option>
+        </select>
+        <select id="tone" class="input" aria-label="Tono de la historia">
+          <option value="oscuro">Oscuro</option>
+          <option value="realista">Realista</option>
+          <option value="fantasia">Fantasía / épico</option>
+          <option value="thriller">Thriller</option>
+        </select>
+      </div>
+
+      <div class="grid" aria-hidden="false">
+        <div>
+          <div class="row">
+            <div class="label">Maldad / métodos</div>
+            <div class="range-wrap">
+              <input id="evilness" class="range" type="range" min="0" max="10" value="7" aria-label="Maldad"/>
+              <div class="value-bubble" id="evilnessOut" aria-live="polite">7</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Nivel de amenaza/impacto</div>
+            <div class="range-wrap">
+              <input id="threat" class="range" type="range" min="0" max="10" value="7" aria-label="Amenaza" />
+              <div class="value-bubble" id="threatOut" aria-live="polite">7</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Agencia (decisiones propias)</div>
+            <div class="range-wrap">
+              <input id="agency" class="range" type="range" min="0" max="10" value="7" aria-label="Agencia" />
+              <div class="value-bubble" id="agencyOut" aria-live="polite">7</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Claridad de motivaciones</div>
+            <div class="range-wrap">
+              <input id="motivation" class="range" type="range" min="0" max="10" value="6" aria-label="Motivaciones" />
+              <div class="value-bubble" id="motivationOut" aria-live="polite">6</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Complejidad psicológica</div>
+            <div class="range-wrap">
+              <input id="complexity" class="range" type="range" min="0" max="10" value="6" aria-label="Complejidad" />
+              <div class="value-bubble" id="complexityOut" aria-live="polite">6</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Consistencia</div>
+            <div class="range-wrap">
+              <input id="consistency" class="range" type="range" min="0" max="10" value="7" aria-label="Consistencia" />
+              <div class="value-bubble" id="consistencyOut" aria-live="polite">7</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Calidad de escritura</div>
+            <div class="range-wrap">
+              <input id="writing" class="range" type="range" min="0" max="10" value="7" aria-label="Escritura" />
+              <div class="value-bubble" id="writingOut" aria-live="polite">7</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Originalidad</div>
+            <div class="range-wrap">
+              <input id="originality" class="range" type="range" min="0" max="10" value="5" aria-label="Originalidad" />
+              <div class="value-bubble" id="originalityOut" aria-live="polite">5</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row">
+            <div class="label">Diálogo distintivo</div>
+            <div class="range-wrap">
+              <input id="dialogue" class="range" type="range" min="0" max="10" value="6" aria-label="Diálogo" />
+              <div class="value-bubble" id="dialogueOut" aria-live="polite">6</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-3">
+          <div class="row">
+            <div class="label">Arco / desarrollo (inicio → clímax → cierre)</div>
+            <div class="range-wrap">
+              <input id="arc" class="range" type="range" min="0" max="10" value="5" aria-label="Arco" />
+              <div class="value-bubble" id="arcOut" aria-live="polite">5</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-3">
+          <div class="row" style="align-items:flex-start;">
+            <div class="label small" style="min-width:auto;margin-bottom:0;">Características / tropos:</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <label class="small checkbox"><input type="checkbox" class="trope" value="trauma"> Trauma revelado</label>
+              <label class="small checkbox"><input type="checkbox" class="trope" value="venganza"> Venganza</label>
+              <label class="small checkbox"><input type="checkbox" class="trope" value="politico"> Motivos políticos</label>
+              <label class="small checkbox"><input type="checkbox" class="trope" value="maldadPorMaldad"> Maldad por maldad</label>
+              <label class="small checkbox"><input type="checkbox" class="trope" value="genius"> Genio estratega</label>
+              <label class="small checkbox"><input type="checkbox" class="trope" value="sympathetic"> Carismático / simpático</label>
+              <label class="small checkbox"><input type="checkbox" class="trope" value="tragicHero"> Rasgos de anti-héroe</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-3">
+          <div class="label small" style="margin-bottom:8px;">Extracto de texto (hasta 1200 caracteres - diálogo o escena)</div>
+          <textarea id="excerpt" maxlength="1200" placeholder="Ej. 'Se quitó la máscara sin prisa. En sus ojos había algo que no era odio —era cálculo.'"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px;flex-wrap:wrap;">
+            <div class="small">Detecta motivaciones, 'mostrar vs contar', voz y nombres.</div>
+            <div style="display:flex;gap:8px;">
+              <button id="clearExcerpt" type="button" class="btn ghost">Borrar</button>
+              <button id="analyzeExcerpt" type="button" class="btn ghost">Analizar extracto</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-3">
+          <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;">
+            <div>
+              <div class="label small" style="margin-bottom:8px;">Escenas con el villano</div>
+              <input id="sceneCount" class="input" type="number" min="0" value="5" aria-label="Número de escenas" />
+            </div>
+            <div>
+              <div class="label small" style="margin-bottom:8px;">Menciones del villano</div>
+              <input id="mentions" class="input" type="number" min="0" value="18" aria-label="Veces mencionado" />
+            </div>
+            <button id="calcBtn" type="button" class="btn" style="height:fit-content;white-space:nowrap;">Calcular resultado</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer">
+        <div class="small">Todo funcional: guardar, exportar, cargar, imprimir y plan de mejora.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="saveBtn" type="button" class="btn ghost">Guardar</button>
+          <button id="exportBtn" type="button" class="btn ghost">Exportar JSON</button>
+          <button id="importBtn" type="button" class="btn ghost">Importar</button>
+          <button id="printBtn" type="button" class="btn ghost">Imprimir</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <aside class="side" aria-label="Panel lateral">
+    <div class="panel" role="status" aria-live="polite">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div class="small">Resultado global</div>
+          <div class="grade" id="gradeLabel">—</div>
+        </div>
+        <div class="gauge" style="min-width:0;">
+          <div class="circle" id="gaugeCircle" aria-hidden="true">
+            <div class="inner">
+              <div class="num" id="finalNum">—</div>
+              <div class="small" style="color:var(--muted)">/100</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="breakdown" id="breakdown" aria-live="polite"></div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="panel-title">Consejos & Plan de mejora</div>
+        <div class="small" id="priorityNote">—</div>
+      </div>
+      <div id="tipsArea">
+        <div class="small">Aún no hay resultado. Usa "Calcular resultado" para generar recomendaciones específicas.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="panel-title">Resumen breve</div>
+        <div class="small">Auto-generado</div>
+      </div>
+      <div id="blurb" class="small" style="line-height:1.6;">—</div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button id="genBlurb" type="button" class="btn ghost">Generar resumen</button>
+        <button id="resetBtn" type="button" class="btn ghost">Reiniciar</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="panel-title">Guardados</div>
+        <div class="small">LocalStorage</div>
+      </div>
+      <div class="saved-list" id="savedList" aria-live="polite"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button id="clearAll" type="button" class="btn ghost">Borrar todos</button>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script>
+/* configuración de pesos */
+const weights = {
+  evilness: 13,
+  threat: 12,
+  writing: 12,
+  motivation: 12,
+  complexity: 9,
+  consistency: 8,
+  originality: 8,
+  dialogue: 8,
+  arc: 6,
+  agency: 12
+};
+const keys = Object.keys(weights);
+const getEl = id => document.getElementById(id);
+
+/* sincronizar sliders con burbujas */
+function setRangeListeners() {
+  keys.forEach(k => {
+    const el = getEl(k);
+    const out = getEl(k + 'Out');
+    if (!el || !out) return;
+    const update = () => { out.textContent = el.value; };
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
+    out.textContent = el.value;
+  });
+}
+
+/* lectura de formulario */
+function readForm() {
+  const values = {};
+  keys.forEach(k => {
+    const el = getEl(k);
+    values[k] = el ? Number(el.value) : 5;
+  });
+  values.name = (getEl('name') && getEl('name').value) ? getEl('name').value.trim() : '';
+  values.role = getEl('role') ? getEl('role').value : 'antagonista';
+  values.tone = getEl('tone') ? getEl('tone').value : 'oscuro';
+  values.sceneCount = Math.max(0, Number(getEl('sceneCount').value) || 0);
+  values.mentions = Math.max(0, Number(getEl('mentions').value) || 0);
+  values.tropes = Array.from(document.querySelectorAll('.trope:checked')).map(i => i.value);
+  values.excerpt = getEl('excerpt') ? getEl('excerpt').value.trim() : '';
+  values.savedAt = new Date().toISOString();
+  return values;
+}
+
+/* cálculo de puntaje */
+function baseScore(values) {
+  let sum = 0;
+  for (const k of keys) sum += (values[k] || 0) * weights[k];
+  return Math.round(sum / 10);
+}
+
+function computeModifiers(values) {
+  const sceneFactor = Math.min(1.5, 1 + Math.max(0, values.sceneCount - 3) * 0.03);
+  const mentionFactor = Math.min(1.2, 1 + Math.max(0, values.mentions - 5) * 0.01);
+  const presence = Math.max(0.8, Math.min(1.2, (sceneFactor + mentionFactor) / 2));
+  const agencyAdj = 0.9 + ((values.agency || 5) / 10) * 0.2;
+  const amb = ((values.complexity || 0) >= 7 && (values.motivation || 0) >= 7) ? 1.05 : 1.0;
+  const tropePenalty = values.tropes && values.tropes.includes('maldadPorMaldad') ? 0.93 : 1.0;
+  const modifier = presence * agencyAdj * amb * tropePenalty;
+  return { presence, agencyAdj, amb, tropePenalty, modifier };
+}
+
+function finalizeScore(values) {
+  const base = baseScore(values);
+  const mods = computeModifiers(values);
+  const final = Math.round(Math.max(0, Math.min(100, base * mods.modifier)));
+  return { base, final, mods };
+}
+
+/* análisis heurístico de extracto */
+function analyzeExcerpt(text) {
+  if (!text) {
+    return { notes: 'No se proporcionó extracto.', motivationFound: false, showVsTellScore: null, voiceScore: null, names: [], sentences: 0, length: 0 };
+  }
+  const lower = text.toLowerCase();
+  const motifs = ['porque','venganza','trauma','traición','poder','miedo','justicia','ambición','odio','revenge','because','for the'];
+  const motivationFound = motifs.some(m => lower.includes(m));
+  const sentences = text.split(/[.!?]+/).filter(Boolean).length;
+  const names = Array.from(new Set((text.match(/\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}\b/g) || [])));
+  const len = text.length;
+
+  const tellWords = ['sintió','pensó','sabía','estaba','se dio cuenta','se sintió','sabe','sintió que','thinking','felt','knew','decided'];
+  let tellCount = 0;
+  tellWords.forEach(w => { if (lower.includes(w)) tellCount++; });
+  const showScore = Math.max(0, 10 - tellCount * 2);
+
+  const common = ['ser','estar','tener','hacer','ir','decir','dar','ver','poner','parecer'];
+  const words = text.toLowerCase().replace(/[^\wáéíóúñ]/g,' ').split(/\s+/).filter(Boolean);
+  const unique = new Set(words);
+  let commonCount = 0;
+  words.forEach(w => { if (common.includes(w)) commonCount++; });
+  const voiceScore = Math.max(0, Math.min(10, Math.round((unique.size / Math.max(1, words.length)) * 10) - Math.min(4, Math.floor(commonCount / 6))));
+
+  const notes = `Extracto: ${len} caracteres, ${sentences} oración(es).` +
+    (motivationFound ? ' Indica motivación.' : ' No se detecta motivación clara.') +
+    ` Mostrar vs contar: ${showScore}/10. Voz: ${voiceScore}/10. Nombres detectados: ${names.join(', ') || 'ninguno'}.`;
+
+  return { notes, motivationFound, showVsTellScore: showScore, voiceScore, names, sentences, length: len };
+}
+
+/* recomendaciones */
+function recommendations(values, analysis, scores) {
+  const recs = [];
+  const low = (k, th = 5) => (values[k] || 0) <= th;
+  const issues = [];
+  if (low('motivation', 6)) issues.push('motivación insuficiente');
+  if (low('complexity', 5)) issues.push('falta de capas/contradicciones');
+  if (low('agency', 5)) issues.push('baja agencia (pocas decisiones propias)');
+  if (low('originality', 5)) issues.push('originalidad limitada / tropos');
+  if (low('writing', 6)) issues.push('escritura / escenas mejorables');
+  if (low('dialogue', 5)) issues.push('voz y diálogo poco distintivo');
+  if (low('consistency', 5)) issues.push('inconsistencias en conducta');
+  if (low('arc', 5)) issues.push('arco narrativo débil');
+
+  if (scores.final >= 85) recs.push({ text: 'Villano sólido. Pulir pequeñas señales de originalidad y micro-escenas que destaquen su identidad.', prio: 'Baja' });
+  else if (scores.final >= 70) recs.push({ text: 'Buen trabajo. Prioriza fortalecer originalidad y cerrar el arco para aumentar memorabilidad.', prio: 'Media' });
+  else if (scores.final >= 50) recs.push({ text: 'Villano funcional pero con fallas claras en profundidad o coherencia. Sigue el plan de abajo.', prio: 'Alta' });
+  else if (scores.final >= 30) recs.push({ text: 'Villano débil. Reescribe motivaciones y añade consecuencias visibles de sus actos.', prio: 'Alta' });
+  else recs.push({ text: 'Villano problemático. Replantea objetivo, motivos y agency; evita "maldad por maldad".', prio: 'Urgente' });
+
+  if (issues.includes('motivación insuficiente')) recs.push({ text: 'Añade una escena temprana que muestre (no diga) el origen de su impulso: un recuerdo sensorial, una pérdida o una promesa rota.', prio: 'Alta' });
+  if (issues.includes('falta de capas/contradicciones')) recs.push({ text: 'Introduce contradicciones: pequeñas acciones que muestren dudas o gestos humanos que compliquen verificación moral.', prio: 'Media' });
+  if (issues.includes('baja agencia (pocas decisiones propias)')) recs.push({ text: 'Dale decisiones difíciles con consecuencias visibles (punto de no retorno). Evita que otros tomen las decisiones por él.', prio: 'Alta' });
+  if (issues.includes('originalidad limitada / tropos')) {
+    const tropes = values.tropes || [];
+    if (tropes.includes('maldadPorMaldad')) recs.push({ text: 'Si usas "maldad por maldad", añade un motivo íntimo o una fachada que explique la elección, o transforma el tropo en subversión.', prio: 'Alta' });
+    if (tropes.includes('venganza')) recs.push({ text: 'Si es venganza, especifica su objeto, el coste real de conseguirla y qué pierde si la logra.', prio: 'Media' });
+    if (tropes.length === 0) recs.push({ text: 'No marcas tropos: considera introducir al menos un rasgo insólito (una debilidad humana concreta) que lo haga distintivo.', prio: 'Media' });
+  }
+  if (issues.includes('escritura / escenas mejorables')) recs.push({ text: 'Reescribe escenas clave en "tiempo presente" sensorial: vista, sonido, olor, tacto para mostrar consecuencias.', prio: 'Media' });
+  if (issues.includes('voz y diálogo poco distintivo')) recs.push({ text: 'Define un patrón verbal único: frases recurrentes, muletillas, ritmo o una metáfora que lo identifique en cada aparición.', prio: 'Alta' });
+  if (issues.includes('inconsistencias en conducta')) recs.push({ text: 'Revisa fichas: para cada decisión importante, anota motivo y coste; si no encaja, añade puente narrativo.', prio: 'Alta' });
+  if (issues.includes('arco narrativo débil')) recs.push({ text: 'Esboza su arco en 3 actos y añade un momento "punto de no retorno" y una consecuencia irreversible en el clímax.', prio: 'Alta' });
+
+  if (analysis && analysis.showVsTellScore !== null) {
+    if (analysis.showVsTellScore <= 4) recs.push({ text: 'El extracto tiende a "contar" emociones. Reescribe para mostrar reacciones físicas y efectos externos.', prio: 'Alta' });
+    if (analysis.voiceScore <= 4) recs.push({ text: 'La voz no destaca: prueba frases cortas o una cadencia que contraste con el narrador.', prio: 'Media' });
+    if (!analysis.motivationFound) recs.push({ text: 'El extracto no muestra motivación: añade una línea que la deje explícita o una pista poderosa.', prio: 'Alta' });
+  }
+
+  const prioMap = { Urgente: 4, Alta: 3, Media: 2, Baja: 1 };
+  const unique = [];
+  const seen = new Set();
+  for (const r of recs) {
+    if (!seen.has(r.text)) { unique.push(r); seen.add(r.text); }
+  }
+  unique.sort((a,b) => (prioMap[b.prio]||0) - (prioMap[a.prio]||0));
+  return unique.slice(0, 10);
+}
+
+/* render UI */
+function renderBreakdown(values) {
+  const container = getEl('breakdown');
+  container.innerHTML = '';
+  const labels = {
+    evilness: 'Maldad',
+    threat: 'Amenaza',
+    agency: 'Agencia',
+    motivation: 'Motivación',
+    complexity: 'Complejidad',
+    consistency: 'Consistencia',
+    writing: 'Escritura',
+    originality: 'Originalidad',
+    dialogue: 'Diálogo',
+    arc: 'Arco'
+  };
+  keys.forEach(k => {
+    const row = document.createElement('div'); row.className = 'break-row';
+    const name = document.createElement('div'); name.textContent = labels[k];
+    const bar = document.createElement('div'); bar.className = 'bar';
+    const i = document.createElement('i');
+    // small timeout to allow CSS transitions
+    setTimeout(() => { i.style.width = ((values[k] || 0) * 10) + '%'; }, 50);
+    bar.appendChild(i);
+    const badge = document.createElement('div'); badge.className = 'badge'; badge.textContent = (values[k] || 0) + '/10';
+    row.appendChild(name); row.appendChild(bar); row.appendChild(badge);
+    container.appendChild(row);
+  });
+}
+
+function renderGauge(final) {
+  const gauge = getEl('gaugeCircle');
+  const angle = Math.round(final * 3.6);
+  gauge.style.background = `conic-gradient(var(--accent1) ${angle}deg, rgba(255,255,255,0.03) ${angle}deg)`;
+  getEl('finalNum').textContent = final;
+  const labelEl = getEl('gradeLabel');
+  if (final >= 85) { labelEl.textContent = 'Excelente — Villano memorable'; labelEl.style.color = 'var(--success)'; }
+  else if (final >= 70) { labelEl.textContent = 'Muy bueno — con margen para brillar'; labelEl.style.color = '#a3e635'; }
+  else if (final >= 50) { labelEl.textContent = 'Funcional — necesita profundidad'; labelEl.style.color = '#f59e0b'; }
+  else if (final >= 30) { labelEl.textContent = 'Débil — reescritura recomendada'; labelEl.style.color = 'var(--danger)'; }
+  else { labelEl.textContent = 'Problemático — rehacer objetivos y motivos'; labelEl.style.color = '#dc2626'; }
+}
+
+function renderTips(list, analysis, scores, values) {
+  const area = getEl('tipsArea');
+  area.innerHTML = '';
+  if (!list || list.length === 0) { area.innerHTML = '<div class="small">Sin recomendaciones.</div>'; return; }
+  const ul = document.createElement('div'); ul.className = 'tips-list';
+  list.forEach(r => {
+    const d = document.createElement('div'); d.className = 'tip';
+    const prioClass = r.prio.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;"><div style="flex:1;">${r.text}</div><div class="priority ${prioClass}">${r.prio}</div></div>`;
+    ul.appendChild(d);
+  });
+  area.appendChild(ul);
+
+  const plan = document.createElement('div');
+  plan.style.marginTop = '16px'; plan.style.paddingTop = '16px'; plan.style.borderTop = '1px solid rgba(255,255,255,0.04)';
+  plan.innerHTML = `<div style="font-weight:700;margin-bottom:10px;font-size:14px;">Plan de 3 pasos prioritarios</div>`;
+  const top = list.filter(l => l.prio === 'Urgente' || l.prio === 'Alta').slice(0, 3);
+  const steps = [];
+  top.forEach((t,i) => {
+    steps.push(`<div style="margin-bottom:12px;padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;"><strong>Paso ${i+1}:</strong> ${t.text}<div class="small" style="margin-top:8px;color:var(--muted);line-height:1.5;">Ejercicio: escribe 1 escena (300–600 palabras) donde la decisión del villano tiene coste visible. Limita el narrador y muestra reacciones físicas.</div></div>`);
+  });
+  if (steps.length === 0) {
+    steps.push(`<div style="margin-bottom:8px;"><strong>1.</strong> Revisa voces y añade 1 micro-escena por rasgo (50–150 palabras).</div>`);
+    steps.push(`<div style="margin-bottom:8px;"><strong>2.</strong> Define su objetivo con una frase: "Desea X porque Y".</div>`);
+    steps.push(`<div style="margin-bottom:8px;"><strong>3.</strong> Introduce una contradicción que lo humanice.</div>`);
+  }
+  plan.innerHTML += steps.join('');
+  area.appendChild(plan);
+
+  if (analysis && analysis.notes) {
+    const ex = document.createElement('div');
+    ex.style.marginTop = '12px'; ex.style.paddingTop = '12px'; ex.style.borderTop = '1px solid rgba(255,255,255,0.04)';
+    ex.className = 'small'; ex.style.color = 'var(--muted)'; ex.style.lineHeight = '1.5';
+    ex.innerHTML = '<strong>Diagnóstico extracto:</strong> ' + analysis.notes;
+    area.appendChild(ex);
+  }
+  const prioNote = getEl('priorityNote');
+  prioNote.textContent = list[0] ? 'Prioridad: ' + list[0].prio : '—';
+}
+
+/* blurb */
+function generateBlurb(values, scores, analysis) {
+  const name = values.name || 'El villano';
+  const role = values.role || 'antagonista';
+  const tone = values.tone || '';
+  const final = scores.final;
+  const summaryTier = final >= 85 ? 'Excelente' : final >= 70 ? 'Muy bueno' : final >= 50 ? 'Funcional' : final >= 30 ? 'Débil' : 'Problemático';
+  const sentence = `${name}, como ${role} (${tone}), obtiene ${final}/100 — ${summaryTier}. Base: ${scores.base}/100 — modificadores aplicados: ${Math.round(scores.mods.modifier * 100) / 100}.`;
+  const hint = final >= 70 ? 'Potencia la originalidad y añade micro-escenas para que sea inolvidable.' : 'Prioriza mostrar motivaciones y reforzar agencia con decisiones con coste.';
+  return sentence + ' ' + hint;
+}
+
+/* localStorage helpers */
+const storagePrefix = 'vilanalitico-';
+function saveLocal(payload) {
+  try {
+    const key = storagePrefix + (payload.values.name || 'unnamed') + '-' + Date.now();
+    localStorage.setItem(key, JSON.stringify(payload));
+    return key;
+  } catch (e) { console.error(e); return null; }
+}
+function listSaved() {
+  const ks = Object.keys(localStorage).filter(k => k.startsWith(storagePrefix)).sort().reverse();
+  return ks.map(k => ({ key: k, data: JSON.parse(localStorage.getItem(k)) }));
+}
+function renderSavedList() {
+  const list = listSaved();
+  const el = getEl('savedList');
+  el.innerHTML = '';
+  if (list.length === 0) { el.innerHTML = '<div class="small">No hay análisis guardados.</div>'; return; }
+  list.forEach(item => {
+    const div = document.createElement('div'); div.className = 'saved-item';
+    const meta = document.createElement('div'); meta.className = 'meta';
+    const savedDate = new Date(item.data.values?.savedAt || item.data.meta?.savedAt || Date.now());
+    meta.innerHTML = `<div>${item.data.values.name || 'Sin nombre'}</div><div>${savedDate.toLocaleString('es-ES', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })}</div>`;
+    const actions = document.createElement('div'); actions.className = 'saved-actions';
+    const loadBtn = document.createElement('button'); loadBtn.className = 'btn ghost'; loadBtn.textContent = 'Cargar';
+    loadBtn.addEventListener('click', () => {
+      const vals = item.data.values;
+      keys.forEach(k => {
+        const el = getEl(k); const out = getEl(k + 'Out');
+        if (el) el.value = vals[k] || 5; if (out) out.textContent = vals[k] || 5;
+      });
+      if (getEl('name')) getEl('name').value = vals.name || '';
+      if (getEl('role')) getEl('role').value = vals.role || 'antagonista';
+      if (getEl('tone')) getEl('tone').value = vals.tone || 'oscuro';
+      if (getEl('sceneCount')) getEl('sceneCount').value = vals.sceneCount || 0;
+      if (getEl('mentions')) getEl('mentions').value = vals.mentions || 0;
+      if (getEl('excerpt')) getEl('excerpt').value = vals.excerpt || '';
+      document.querySelectorAll('.trope').forEach(cb => cb.checked = vals.tropes && vals.tropes.includes(cb.value));
+      alert('✓ Valores cargados correctamente');
+    });
+
+    const delBtn = document.createElement('button'); delBtn.className = 'btn ghost'; delBtn.textContent = '✕';
+    delBtn.style.padding = '6px 10px';
+    delBtn.addEventListener('click', () => {
+      if (confirm('¿Eliminar este análisis?')) { localStorage.removeItem(item.key); renderSavedList(); }
+    });
+
+    actions.appendChild(loadBtn); actions.appendChild(delBtn);
+    div.appendChild(meta); div.appendChild(actions); el.appendChild(div);
+  });
+}
+
+/* eventos */
+document.addEventListener('click', (ev) => {
+  // avoid any accidental double triggers on mobile: no-op placeholder
+});
+
+/* botones */
+getEl('calcBtn').addEventListener('click', () => {
+  const values = readForm();
+  const analysis = analyzeExcerpt(values.excerpt);
+  const scores = finalizeScore(values);
+  renderBreakdown(values);
+  renderGauge(scores.final);
+  const recs = recommendations(values, analysis, scores);
+  renderTips(recs, analysis, scores, values);
+  getEl('blurb').textContent = generateBlurb(values, scores, analysis);
+});
+
+getEl('analyzeExcerpt').addEventListener('click', (e) => {
+  e.preventDefault();
+  const text = getEl('excerpt').value.trim();
+  const analysis = analyzeExcerpt(text);
+  alert(analysis.notes);
+});
+
+getEl('clearExcerpt').addEventListener('click', (e) => { e.preventDefault(); getEl('excerpt').value = ''; });
+
+getEl('genBlurb').addEventListener('click', () => {
+  const values = readForm();
+  const scores = finalizeScore(values);
+  getEl('blurb').textContent = generateBlurb(values, scores, analyzeExcerpt(values.excerpt));
+});
+
+getEl('resetBtn').addEventListener('click', () => {
+  if (!confirm('¿Reiniciar todos los valores a los predeterminados?')) return;
+  const defaults = { evilness:7, threat:7, agency:7, motivation:6, complexity:6, consistency:7, writing:7, originality:5, dialogue:6, arc:5 };
+  keys.forEach(k => { const el = getEl(k); const out = getEl(k + 'Out'); if (el) el.value = defaults[k]; if (out) out.textContent = defaults[k]; });
+  if (getEl('name')) getEl('name').value = '';
+  if (getEl('role')) getEl('role').value = 'antagonista';
+  if (getEl('tone')) getEl('tone').value = 'oscuro';
+  if (getEl('sceneCount')) getEl('sceneCount').value = 5;
+  if (getEl('mentions')) getEl('mentions').value = 18;
+  if (getEl('excerpt')) getEl('excerpt').value = '';
+  if (getEl('breakdown')) getEl('breakdown').innerHTML = '';
+  if (getEl('finalNum')) getEl('finalNum').textContent = '—';
+  if (getEl('gradeLabel')) getEl('gradeLabel').textContent = '—';
+  if (getEl('gaugeCircle')) getEl('gaugeCircle').style.background = 'conic-gradient(var(--accent1) 0deg, rgba(255,255,255,0.03) 0deg)';
+  if (getEl('tipsArea')) getEl('tipsArea').innerHTML = '<div class="small">Aún no hay resultado. Usa "Calcular resultado".</div>';
+  if (getEl('blurb')) getEl('blurb').textContent = '—';
+  if (getEl('priorityNote')) getEl('priorityNote').textContent = '—';
+  document.querySelectorAll('.trope').forEach(cb => cb.checked = false);
+});
+
+getEl('saveBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  const values = readForm(); const scores = finalizeScore(values);
+  const payload = { meta:{ savedAt: new Date().toISOString() }, values, scores };
+  const key = saveLocal(payload);
+  if (key) { alert('✓ Análisis guardado correctamente'); renderSavedList(); } else alert('✗ Error al guardar. Verifica que el almacenamiento local esté disponible.');
+});
+
+getEl('exportBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  const values = readForm(); const scores = finalizeScore(values);
+  const payload = { meta:{ exportedAt: new Date().toISOString() }, values, scores };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = (values.name || 'villain') + '-analysis.json';
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+getEl('importBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json';
+  input.addEventListener('change', (evt) => {
+    const file = evt.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.values) {
+          const vals = data.values;
+          keys.forEach(k => { const el = getEl(k); const out = getEl(k + 'Out'); if (el) el.value = vals[k] || 5; if (out) out.textContent = vals[k] || 5; });
+          if (getEl('name')) getEl('name').value = vals.name || '';
+          if (getEl('role')) getEl('role').value = vals.role || 'antagonista';
+          if (getEl('tone')) getEl('tone').value = vals.tone || 'oscuro';
+          if (getEl('sceneCount')) getEl('sceneCount').value = vals.sceneCount || 0;
+          if (getEl('mentions')) getEl('mentions').value = vals.mentions || 0;
+          if (getEl('excerpt')) getEl('excerpt').value = vals.excerpt || '';
+          document.querySelectorAll('.trope').forEach(cb => cb.checked = vals.tropes && vals.tropes.includes(cb.value));
+          alert('✓ JSON cargado correctamente');
+        } else alert('✗ JSON inválido: falta campo values');
+      } catch (err) { alert('✗ Error leyendo JSON: ' + err.message); }
+    };
+    reader.readAsText(file);
+  });
+  input.click();
+});
+
+getEl('printBtn').addEventListener('click', (e) => { e.preventDefault(); window.print(); });
+
+getEl('clearAll').addEventListener('click', () => {
+  if (confirm('¿Eliminar todos los análisis guardados localmente?')) {
+    Object.keys(localStorage).filter(k => k.startsWith(storagePrefix)).forEach(k => localStorage.removeItem(k));
+    renderSavedList();
+  }
+});
+
+/* inicialización */
+setRangeListeners();
+renderSavedList();
+keys.forEach(k => { const out = getEl(k + 'Out'); const el = getEl(k); if (out && el) out.textContent = el.value; });
+
+</script>
+</body>
+</html>
